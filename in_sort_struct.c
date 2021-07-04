@@ -173,6 +173,7 @@ int main(void){
   afhead = heading(head); //aheadを先頭に持っていく
   show_data_hip(afhead); //backを使って全部出力
   //空ける
+  free(afhead);
   free(head);
   free(p);
   
