@@ -1,6 +1,4 @@
 # TE3
 
 ## in_sort_struct.c
-挿入ソートを自己参照構造体を使って実装したもの
-next と backにアクセスできるようになっているが, そのせいで
-つなぎ合わせる手間が大きくなっている. ボツ
+It is insertion sort, but it is very big for effort, why it has next pointer and back pointer.
