@@ -3,8 +3,22 @@
 #include<time.h>
 #include<sys/time.h>
 
-#define N 20000//全体数
+#define N 10//全体数
 #define swap(x,y,type) do{type t; t = x; x = y; y = t;}while(0)
+
+//--メモリ解放わすれ検出--
+#define LEAK_DETECT
+#ifdef LEAK_DETECT
+#include "leakdetect.h"
+#define init leak_detect_init
+#define malloc(s) leak_detelc_malloc(s, __FILE__, __LINE__) 
+#define free leak_detect_free
+#define check leak_detect_check
+#else
+#define init() 
+#define check()
+#endif
+//------------------------
 
 void quick_sort(int *,int);
 
@@ -15,7 +29,7 @@ typedef struct Store{
 
 int main(void){
   struct timeval s,e;
-  int i,j;
+  int i;
   int a[N];
   //int test[N] = {3,2,0,5,2,3,4,1,3,8};
 
@@ -47,7 +61,7 @@ int main(void){
 //一番左の値より大きい値を探す
 // num...ソートする対象, s ~ eの要素で分割
 void quick_sort(int *num,int e){
-  int i,j;
+  int i;
   int l,r; //分割する配列の要素数
   store *small,*large,temp;
   int pivot;
@@ -111,27 +125,18 @@ void quick_sort(int *num,int e){
   large[l_num].store = (int *)malloc(sizeof(int) * r);
 
   //要素数
-  //printf("l : %d\nr : %d\n",l,r);
   small[s_num].number = l-1;
   large[l_num].number = r-1;
 
   //基準点より下の値
   for(i = 0;i<l;i++){
     small[s_num].store[i] = num[i];
-    
-    //printf("small[%d] : %d ",i,small[s_num].store[i]);
-    //fflush(stdout);
   }
-  //putchar('\n');
-  
+
   //基準点以上の値
-  for(j = 0;j<r;j++){
-    large[l_num].store[j] = num[j+l];
-    
-    //printf("large[%d] : %d ",j,large[s_num].store[j]);
-    //fflush(stdout);
+  for(i = 0;i<r;i++){
+    large[l_num].store[i] = num[i+l];
   }
-  //putchar('\n');
   //-------------numを分割完了-------------------------
   
   //smallの方から見る
@@ -146,7 +151,6 @@ void quick_sort(int *num,int e){
         n++;
         free(small[s_num].store);
         sma = 0,lar = 1;
-        //printf("n : %d\n",n);
         s_num--;
         continue;
       }
@@ -174,8 +178,8 @@ void quick_sort(int *num,int e){
         i++;
       }
       if(flag == 1){
-        for(j = 0;j<i;j++){
-          num[n] = small[s_num].store[j];
+        for(i = 0;i<small[s_num].number + 1;i++){
+          num[n] = small[s_num].store[i];
           n++;
         }
         free(small[s_num].store);
@@ -184,10 +188,6 @@ void quick_sort(int *num,int e){
         flag = 0;
         continue;
       }
-
-      //printf("%d\n",pivot);
-      //fflush(stdout);
-
       //基準点で分割する
       l = 0;
       r = 1;
@@ -215,41 +215,26 @@ void quick_sort(int *num,int e){
           r++;
         }
       }
-      //printf("l : %d\nr : %d\n",l,r);
-      //fflush(stdout);
-
       //分割したものを配列に入れる
       //領域を確保
       l_num++,s_num++;
 
-      //printf("l_num : %d s_num : %d\n",l_num,s_num);
-      //fflush(stdout);
-
       small[s_num].store = (int *)malloc(sizeof(int) * l);
       large[l_num].store = (int *)malloc(sizeof(int) * r);
-
-      
+  
       //要素数
       small[s_num].number = l-1;
       large[l_num].number = r-1;
 
       //基準点より下の値
-      //puts("sma");
-      //fflush(stdout);
       for(i = 0;i<l;i++){
         small[s_num].store[i] = small[s_num-1].store[i];
-        //printf("small[%d] : %d ",i,small[s_num].store[i]);
-        //fflush(stdout);
       }
-      //putchar('\n');
 
       //基準点以上の値
-      for(j = 0;j<r;j++){
-        large[l_num].store[j] = small[s_num-1].store[j+l];
-        //rintf("large[%d] : %d ",j,large[l_num].store[j]);
-        //fflush(stdout);
+      for(i = 0;i<r;i++){
+        large[l_num].store[i] = small[s_num-1].store[i+l];
       }
-      //putchar('\n');
 
       free(small[s_num-1].store); //一個前のsmallを解放
     }
@@ -258,16 +243,12 @@ void quick_sort(int *num,int e){
       if(large[l_num].number == 0){ //要素が一個しかなかったらnumに入れて一個前のlargeを見る
         num[n] = large[l_num].store[0];
         n++;
-        //printf("l_num[%d] : %d\nn : %d\n",l_num,large[l_num].store[0],n);
         free(large[l_num].store);
         l_num--;
         continue;
       }
 
       max = large[l_num].number; //maxを更新
-
-      //printf("max : %d\n",max);
-      //fflush(stdout);
 
       //基準点を決める　最小の値はだめ
       i = 1;
@@ -287,8 +268,8 @@ void quick_sort(int *num,int e){
         i++;
       }
       if(flag == 1){
-        for(j = 0;j<i;j++){
-          num[n] = large[l_num].store[j];
+        for(i = 0;i<large[l_num].number + 1;i++){
+          num[n] = large[l_num].store[i];
           n++;
         }
         free(large[l_num].store);
@@ -297,9 +278,6 @@ void quick_sort(int *num,int e){
         continue;
       }
 
-      //printf("pivot : %d\n",pivot);
-      //fflush(stdout);
-      
       //基準点で分割する
       l = 0;
       r = 1;
@@ -332,11 +310,7 @@ void quick_sort(int *num,int e){
       //領域を確保
       s_num++;
 
-      //printf("l_num : %d s_num : %d\n",l_num,s_num);
-      //fflush(stdout);
-
       small[s_num].store = (int *)malloc(sizeof(int) * l);
-      //large[l_num].store = (int *)malloc(sizeof(int) * r);
       temp.store = (int *)malloc(sizeof(int) * r);
 
       //要素数
@@ -344,22 +318,14 @@ void quick_sort(int *num,int e){
       temp.number = r-1;
 
       //基準点より下の値
-      
       for(i = 0;i<l;i++){
         small[s_num].store[i] = large[l_num].store[i];
-        
-        //printf("small[%d] : %d ",i,small[s_num].store[i]);
-        //fflush(stdout);
       }
-      //putchar('\n');
 
       //基準点以上の値
-      for(j = 0;j<r;j++){
-        temp.store[j] = large[l_num].store[j+l];
-        //printf("large[%d] : %d ",j,large[l_num].store[j]);
-        //fflush(stdout);
+      for(i = 0;i<r;i++){
+        temp.store[i] = large[l_num].store[i+l];
       }
-      //putchar('\n');
       
       free(large[l_num].store);
 
@@ -369,17 +335,11 @@ void quick_sort(int *num,int e){
       large[l_num].number = temp.number;
       for(i = 0;i<r;i++){
         large[l_num].store[i] = temp.store[i];
-
-        //printf("large[%d] : %d ",j,large[l_num].store[i]);
-        //fflush(stdout);
       }
-      //putchar('\n');
 
       free(temp.store);
 
       sma = 1,lar = 0;//smallの方見る
-      //puts("end");
-      //fflush(stdout);
     }
   }
 

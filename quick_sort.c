@@ -3,7 +3,7 @@
 #include<time.h>
 #include<sys/time.h>
 
-#define N 20000 //全体数
+#define N 40//全体数
 #define swap(x,y,type) do{type t; t = x; x = y; y = t;}while(0)
 
 void quick_sort(int *,int,int);
@@ -51,6 +51,9 @@ void quick_sort(int *num,int s,int e){
     int n = 1;
     p = num[i];
     while(1){
+      puts("a");
+      fflush(stdout);
+
       if(i + n > j){ //値が全部同じ
         flag = 0; //終了
         break;
@@ -67,10 +70,13 @@ void quick_sort(int *num,int s,int e){
     
 
     while(flag == 1){ //基準点以上の値を探索
+      puts("k");
+      fflush(stdout);
+
       if(num[i] >= p){
         break;
       }
-      if(i == j){ //num[i]が最大の値の時
+      if(i == e){ //num[i]が最大の値の時
         quick_sort(num,s,e-1); //最大の値を除外して判定
         flag = 0; //終了
       }
@@ -79,15 +85,27 @@ void quick_sort(int *num,int s,int e){
     
 
     while(flag == 1){ //基準点未満の値を探索
+      puts("c");
+      fflush(stdout);
+      
       if(num[j] < p){
         swap(num[i],num[j],int);
-        break;      
+        
+        puts("--------------------------------------------------------------");
+        for(x = 0;x<N;x++){
+          printf("%d ",num[x]);
+        }
+        fflush(stdout);
+        putchar('\n');
+
+        break;
       }
       if(j == i){
-        // if(s == j-1){ //小さいほうの値が一個しかない
-        //   flag = 0;
-        //   break;
-        // }
+        if(j == s){ //num[j]が最小の時
+          quick_sort(num,s+1,e); // 最小の値を除外して判定
+          flag = 0;
+          break;
+        }
         quick_sort(num,s,j-1); //分割した小さいほうの値を判定
         j = e; //大きいほうを判定するためにjを末尾に持っていく
         break;
