@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-# atcoder
-# atcoder
-=======
 # TE3
 
 ## in_sort_struct.c
