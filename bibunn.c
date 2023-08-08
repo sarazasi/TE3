@@ -1,4 +1,5 @@
 #include<stdio.h>
+#include<math.h>
 
 #define func(x) 0.5 * (expo((x),6)-expo((x),3))
 #define lim(x) func(1+x)/x 
